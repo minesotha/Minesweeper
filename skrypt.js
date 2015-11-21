@@ -4,6 +4,7 @@ var size;
 var bombCount;
 var board =[];
 var isEndGame=false;
+var  toReveal;
 
 
 //funkcja updatujaca czas
@@ -20,7 +21,7 @@ function startGame()
 {
 size = prompt("Wybierz wielkość planszy: ", "5");
 bombCount=prompt("Wybierz ilość bomb", "5");
-    console.log(size);
+
 	
 	//jezeli bledne dane, pytaj do skutku
     if (size == null || size<5 || bombCount<5 ||bombCount>(size*size) ){
@@ -28,6 +29,7 @@ bombCount=prompt("Wybierz ilość bomb", "5");
     }
 	//inaczej rozpocznij nowa gre
 	else{
+		board=[];
 		sec=0;
 		if(timeStarted==true){
 			//usuniecie starej planszy i wyzerowanie licznika
@@ -38,11 +40,12 @@ bombCount=prompt("Wybierz ilość bomb", "5");
 			//jezeli zupelnie nowa gra, ustawienie licznika
 		setInterval(function(){time()},1000);
 		}
-		
 		timeStarted = true;
 		isEndGame=false;
 		makeBoard();
+	toReveal=size*size-bombCount;
 	
+		$('#toRev').html(toReveal);
 	}
 	
 }
@@ -64,10 +67,9 @@ var row = table.insertRow(i);
 		cell.id=(i)+"_"+(j);
 		
 //dodanie listenerow dla klikniec
-	cell.addEventListener("click", this.mine.bind(this), false);
-	cell.addEventListener("dblclick", this.cellClick.bind(this), false);
+	cell.addEventListener("click", mine, false);
+	cell.addEventListener("dblclick", cellClick, false);
 
-		console.log(cell.id);
 		}
 }
 
@@ -86,11 +88,7 @@ neu.length=size;
 
 randomMines();
 countNeighbors();
-
-
 }
-
-
 
 
 //losowanie min na planszy
@@ -118,6 +116,7 @@ function countNeighbors(){
     }
 }
 
+
 //funkcja liczaca miny sasiadujace z krotka
 function countN(r, c){
     var count=0;
@@ -134,8 +133,35 @@ function countN(r, c){
     return count;
 }
 
+
+//sprawdzenie, czy z polem  sąsiadują 0
+function checkZeros(r, c){
+    for(var i=r-1; i<=r+1; i++){
+        for(var j=c-1; j<=c+1; j++){
+            if(i>-1 && i<board.length && j>-1 && j<board[i].length){
+                if(board[i][j]==0){
+					if($('#tablica').getCell(i,j).attr('class') != 'emptyN'){
+                     $('#tablica').getCell(i,j).addClass('emptyN');
+					$('#tablica').getCell(i,j).html(board[i][j]);
+				var cur = document.getElementById(i+'_'+j);
+		cur.removeEventListener("click", mine , false);
+		cur.removeEventListener("dblclick", cellClick , false);
+	
+				$('#toRev').html(toReveal--);
+					checkZeros(i, j);
+					}
+                }
+            }
+        }
+    }
+}
+
+
 //obsluga klikniecia
 function cellClick(obj){
+		obj.currentTarget.removeEventListener("click", mine , false);
+		obj.currentTarget.removeEventListener("dblclick", cellClick , false);
+		
 	if(isEndGame==false){
     var id = obj.currentTarget.id;
     var idR = id.substring(0, id.indexOf('_')); 
@@ -145,13 +171,23 @@ function cellClick(obj){
 	//kolorowanie odkrytych pol
     if(board[idR][idC]==-1){
         $('#'+id).addClass('mine');
-    } else if(board[idR][idC]==0){
-        $('#'+id).addClass('emptyN');
-    } else {
+    } 
+	else if(board[idR][idC]==0){
+		checkZeros(idR,idC);
+    } 
+	else {
+	
+		        $('#toRev').html(toReveal--);
+		checkZeros(idR,idC);
         $('#'+id).addClass('empty');
     }
 
     $('#'+id).html(board[idR][idC]);
+	
+	if (toReveal == 0){
+		alert("Kim jesteś? Jesteś zwycięzcą!")
+		isEndGame=true;
+	}
 
 	//jezeli -1, czyli bomba>zakoncz gre, zablokuj ruch, odkryj bomby i zatrzymaj licznik
     if(board[idR][idC]==-1){
@@ -190,5 +226,5 @@ function showBombs(){
 }
 //funkcja jquery zwracajaca komorke tablicy w miejscu x, y
 jQuery.fn.getCell = function(x,y){
-return jQuery( this[0].rows[y].cells[x] );
+return jQuery( this[0].rows[x].cells[y] );
 };
