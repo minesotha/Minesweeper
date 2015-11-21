@@ -100,7 +100,6 @@ function randomMines(){
         if(board[r][c]!=-1){
             board[r][c]=-1;
             tmp++;
-			console.log(r,c);
         }
     }
 }
@@ -191,11 +190,11 @@ function cellClick(obj){
 
 	//jezeli -1, czyli bomba>zakoncz gre, zablokuj ruch, odkryj bomby i zatrzymaj licznik
     if(board[idR][idC]==-1){
-        alert('Koniec gry');
 				showBombs();
         $('#time').html(sec);
 		isEndGame=true;
         sec=-1;
+		alert('Koniec gry');
     }
 	}
 }
@@ -206,7 +205,6 @@ function mine(obj){
     var id = obj.currentTarget.id;
     var idR = id.substring(0, id.indexOf('_')); 
     var idC = id.substring(id.indexOf('_')+1, id.length);
-    $('#'+id).html('x');
     $('#'+id).removeClass();
     $('#'+id).addClass('black');
 	}
@@ -218,8 +216,10 @@ function showBombs(){
     for (var i=0; i<board.length; i++){
         for (var j=0; j<board[i].length; j++){
           if(board[i][j]==-1){
+			  $('#tablica').getCell(i,j).removeClass('black');
 		$('#tablica').getCell(i,j).addClass('mine');
-      $('#tablica').getCell(i,j).html(board[i][j]);
+		//aby pokazac -1 zamiast obrazka bomby:
+      //$('#tablica').getCell(i,j).html(board[i][j]);
 			}
 			}
 	}
