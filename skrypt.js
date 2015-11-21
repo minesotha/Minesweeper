@@ -140,6 +140,9 @@ function checkZeros(r, c){
             if(i>-1 && i<board.length && j>-1 && j<board[i].length){
                 if(board[i][j]==0){
 					if($('#tablica').getCell(i,j).attr('class') != 'emptyN'){
+					if($('#tablica').getCell(i,j).attr('class') =='black'){
+					$('#tablica').getCell(i,j).removeClass('black');	
+					}	
                      $('#tablica').getCell(i,j).addClass('emptyN');
 					$('#tablica').getCell(i,j).html(board[i][j]);
 				var cur = document.getElementById(i+'_'+j);
